@@ -1,17 +1,15 @@
-use std::process::Command;
+use chrono::Utc;
+use job_scheduler::{Job, JobScheduler};
 use std::fs::File;
 use std::io::prelude::*;
-use chrono::{Utc};
+use std::process::Command;
 use std::time::Duration;
-use job_scheduler::{JobScheduler, Job};
-
-
 
 fn main() {
     let mut sched = JobScheduler::new();
 
     sched.add(Job::new("1/10 * * * * *".parse().unwrap(), || {
-        println!("{:?}",execute_bot());
+        println!("{:?}", execute_bot());
     }));
 
     loop {
@@ -28,7 +26,14 @@ fn execute_bot() -> std::io::Result<String> {
     let mut file = File::create("foo.txt")?;
     let now = Utc::now();
     file.write_all(format!("updated at {:?}", now).as_bytes())?;
-    Command::new("git").args(&["add","foo.txt"]).spawn()?;
-    Command::new("git").args(&["commit","-a", "-m", format!("run yaw {:?}", now).as_str()]).spawn()?;
-    Ok(format!("{:?}", Command::new("git").args(&["push","origin","master"]).output()))
+    Command::new("git").args(&["add", "foo.txt"]).spawn()?;
+    Command::new("git")
+        .args(&["commit", "-a", "-m", format!("run yaw {:?}", now).as_str()])
+        .spawn()?;
+    Ok(format!(
+        "{:?}",
+        Command::new("git")
+            .args(&["push", "origin", "main"])
+            .output()
+    ))
 }
